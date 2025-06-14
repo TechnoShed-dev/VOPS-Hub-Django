@@ -1,0 +1,26 @@
+# Python
+*.pyc
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.venv/
+env/
+venv/
+pip-log.txt
+pip-delete-this-arg.txt
+.python-version
+.env # Keep sensitive environment variables out!
+.vscode/ # VS Code settings can sometimes be project-specific/local
+*.sqlite3 # Your SQLite database file
+media/ # User-uploaded files (if you implement this later)
+static_cdn/ # Collected static files (if you implement this later)
+/htmlcov/
+.coverage
+
+# Django specific
+/static/ # The 'static' folder that `collectstatic` generates
+/staticfiles/ # Another common name for collected static files
+
+# Docker
+*.dockerfile
+.dockerignore

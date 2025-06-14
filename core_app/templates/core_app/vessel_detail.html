@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ vessel.vessel_name }} - Details</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        h1, h2 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px; }
+        .detail-section { margin-bottom: 20px; }
+        .detail-item { margin-bottom: 5px; }
+        .detail-item strong { display: inline-block; width: 180px; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 10px; border-bottom: 1px dotted #f0f0f0; padding-bottom: 5px; }
+        a { text-decoration: none; color: #007bff; }
+        a:hover { text-decoration: underline; }
+        .comment { background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        .comment-meta { font-size: 0.9em; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <p><a href="{% url 'core_app:vessel_list' %}">&larr; Back to all vessels</a></p>
+
+    <h1>{{ vessel.vessel_name }}</h1>
+
+    <div class="detail-section">
+        <h2>Vessel Particulars</h2>
+        <p class="detail-item"><strong>Capacity:</strong> {{ vessel.capacity|default:"N/A" }}</p>
+        <p class="detail-item"><strong>Number of Decks:</strong> {{ vessel.number_of_decks|default:"N/A" }}</p>
+        <p class="detail-item"><strong>General Notes:</strong> {{ vessel.general_notes|default:"None" }}</p>
+        <p class="detail-item"><strong>Additional Hazards:</strong> {{ vessel.additional_hazards|default:"None" }}</p>
+        {% if vessel.deck_layout_link %}
+            <p class="detail-item"><strong>Deck Layout Link:</strong> <a href="{{ vessel.deck_layout_link }}" target="_blank">View Document</a></p>
+        {% endif %}
+        {% if vessel.risk_assessment_document_link %}
+            <p class="detail-item"><strong>Risk Assessment Doc Link:</strong> <a href="{{ vessel.risk_assessment_document_link }}" target="_blank">View Document</a></p>
+        {% endif %}
+    </div>
+
+    <div class="detail-section">
+        <h2>Deck Heights</h2>
+        {% if deck_heights %}
+            <ul>
+                {% for deck in deck_heights %}
+                    <li>
+                        <strong>Deck {{ deck.deck_number }}:</strong> {{ deck.average_deck_height_m|default:"N/A" }}m ({{ deck.deck_type|default:"N/A" }})
+                        {% if deck.notes %} - Notes: {{ deck.notes }}{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No deck heights recorded for this vessel.</p>
+        {% endif %}
+    </div>
+
+    <div class="detail-section">
+        <h2>Comments</h2>
+        {% if comments %}
+            {% for comment in comments %}
+                <div class="comment">
+                    <strong>{{ comment.comment_title }}</strong><br>
+                    {{ comment.comment_details }}
+                    <div class="comment-meta">
+                        Posted by {{ comment.comment_by|default:"Anonymous" }} on {{ comment.date_of_comment|date:"F d, Y H:i" }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No comments for this vessel yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
