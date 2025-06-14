@@ -1,32 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Vessels - VOPS Hub</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        ul { list-style: none; padding: 0; }
-        li { margin-bottom: 10px; }
-        a { text-decoration: none; color: #007bff; }
-        a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-    <h1>All Vessels</h1>
+{# VOPS-Hub/core_app/templates/core_app/vessel_list.html #}
+{% extends 'core_app/base.html' %}
 
-    {% if vessels %}
-        <ul>
-            {% for vessel in vessels %}
-                <li>
-                    <a href="{% url 'core_app:vessel_detail' pk=vessel.pk %}">{{ vessel.vessel_name }}</a>
-                    (Decks: {{ vessel.number_of_decks|default:"N/A" }})
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No vessels found in the database.</p>
-    {% endif %}
-</body>
-</html>
+{% block title %}Vessel List - VOPS-Hub{% endblock title %}
+
+{% block content %}
+<h1 class="mb-4">Vessel List</h1>
+<div class="list-group">
+    {% for vessel in vessels %}
+        <a href="{% url 'core_app:vessel_detail' vessel.pk %}" class="list-group-item list-group-item-action flex-column align-items-start mb-2"> {# UPDATED URL #}
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ vessel.vessel_name }}</h5>
+                <small>Capacity: {{ vessel.capacity|default:"N/A" }}</small>
+            </div>
+            <p class="mb-1">Decks: {{ vessel.number_of_decks|default:"N/A" }}</p>
+            <small class="text-muted">Notes: {{ vessel.general_notes|truncatechars:50|default:"None" }}</small>
+        </a>
+    {% empty %}
+        <p class="text-center">No vessels found.</p>
+    {% endfor %}
+</div>
+{% endblock content %}

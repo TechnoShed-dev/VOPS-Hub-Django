@@ -1,73 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ vessel.vessel_name }} - Details</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-        h1, h2 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px; }
-        .detail-section { margin-bottom: 20px; }
-        .detail-item { margin-bottom: 5px; }
-        .detail-item strong { display: inline-block; width: 180px; }
-        ul { list-style: none; padding: 0; }
-        li { margin-bottom: 10px; border-bottom: 1px dotted #f0f0f0; padding-bottom: 5px; }
-        a { text-decoration: none; color: #007bff; }
-        a:hover { text-decoration: underline; }
-        .comment { background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        .comment-meta { font-size: 0.9em; color: #666; margin-top: 5px; }
-    </style>
-</head>
-<body>
-    <p><a href="{% url 'core_app:vessel_list' %}">&larr; Back to all vessels</a></p>
+{# VOPS-Hub/core_app/templates/core_app/vessel_detail.html #}
+{% extends 'core_app/base.html' %}
 
-    <h1>{{ vessel.vessel_name }}</h1>
+{% block title %}{{ vessel.vessel_name }} Details - VOPS-Hub{% endblock title %}
 
-    <div class="detail-section">
-        <h2>Vessel Particulars</h2>
-        <p class="detail-item"><strong>Capacity:</strong> {{ vessel.capacity|default:"N/A" }}</p>
-        <p class="detail-item"><strong>Number of Decks:</strong> {{ vessel.number_of_decks|default:"N/A" }}</p>
-        <p class="detail-item"><strong>General Notes:</strong> {{ vessel.general_notes|default:"None" }}</p>
-        <p class="detail-item"><strong>Additional Hazards:</strong> {{ vessel.additional_hazards|default:"None" }}</p>
-        {% if vessel.deck_layout_link %}
-            <p class="detail-item"><strong>Deck Layout Link:</strong> <a href="{{ vessel.deck_layout_link }}" target="_blank">View Document</a></p>
-        {% endif %}
-        {% if vessel.risk_assessment_document_link %}
-            <p class="detail-item"><strong>Risk Assessment Doc Link:</strong> <a href="{{ vessel.risk_assessment_document_link }}" target="_blank">View Document</a></p>
-        {% endif %}
-    </div>
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">{{ vessel.vessel_name }}</h2>
+            </div>
+            <div class="card-body">
+                <p class="card-text"><strong>Capacity:</strong> {{ vessel.capacity|default:"N/A" }}</p>
+                <p class="card-text"><strong>Number of Decks:</strong> {{ vessel.number_of_decks|default:"N/A" }}</p>
+                <p class="card-text"><strong>General Notes:</strong> {{ vessel.general_notes|default:"None" }}</p>
+                <p class="card-text"><strong>Additional Hazards:</strong> {{ vessel.additional_hazards|default:"None" }}</p>
+                <p class="card-text"><strong>Deck Layout Link:</strong>
+                    {% if vessel.deck_layout_link %}
+                        <a href="{{ vessel.deck_layout_link }}" target="_blank">View Deck Layout</a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+                <p class="card-text"><strong>Risk Assessment Document Link:</strong>
+                    {% if vessel.risk_assessment_document_link %}
+                        <a href="{{ vessel.risk_assessment_document_link }}" target="_blank">View RA Document</a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+                <p class="card-text"><strong>Vessel Info Link:</strong>
+                    {% if vessel.vessel_info_link %}
+                        <a href="{{ vessel.vessel_info_link }}" target="_blank">View Vessel Info</a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-footer text-muted">
+                <a href="{% url 'core_app:vessel_list' %}" class="btn btn-secondary btn-sm">Back to Vessel List</a> {# UPDATED URL #}
+            </div>
+        </div>
 
-    <div class="detail-section">
-        <h2>Deck Heights</h2>
+        <h3 class="mt-4 mb-3">Deck Heights</h3>
         {% if deck_heights %}
-            <ul>
+            <ul class="list-group mb-4">
                 {% for deck in deck_heights %}
-                    <li>
-                        <strong>Deck {{ deck.deck_number }}:</strong> {{ deck.average_deck_height_m|default:"N/A" }}m ({{ deck.deck_type|default:"N/A" }})
-                        {% if deck.notes %} - Notes: {{ deck.notes }}{% endif %}
+                    <li class="list-group-item">
+                        <strong>Deck Name:</strong> {{ deck.deck_name|default:"N/A" }} (ID: {{ deck.deck_id|default:"N/A" }})<br>
+                        <strong>Average Deck Height:</strong> {{ deck.average_deck_height_m|default:"N/A" }} m
+                        <small class="text-muted d-block">Type: {{ deck.deck_type|default:"N/A" }}</small>
+                        <small class="text-muted d-block">Notes: {{ deck.notes|default:"None" }}</small>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
             <p>No deck heights recorded for this vessel.</p>
         {% endif %}
-    </div>
 
-    <div class="detail-section">
-        <h2>Comments</h2>
+        <h3 class="mt-4 mb-3">Comments</h3>
         {% if comments %}
-            {% for comment in comments %}
-                <div class="comment">
-                    <strong>{{ comment.comment_title }}</strong><br>
-                    {{ comment.comment_details }}
-                    <div class="comment-meta">
-                        Posted by {{ comment.comment_by|default:"Anonymous" }} on {{ comment.date_of_comment|date:"F d, Y H:i" }}
+            <div class="list-group">
+                {% for comment in comments %}
+                    <div class="list-group-item list-group-item-light mb-2">
+                        <h5 class="mb-1">{{ comment.comment_title }}</h5>
+                        <p class="mb-1">{{ comment.comment_details }}</p>
+                        <small class="text-muted">By {{ comment.comment_by|default:"Anonymous" }} on {{ comment.date_of_comment|date:"d M Y H:i" }}</small>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         {% else %}
-            <p>No comments for this vessel yet.</p>
+            <p>No comments for this vessel.</p>
         {% endif %}
     </div>
-</body>
-</html>
+</div>
+{% endblock content %}

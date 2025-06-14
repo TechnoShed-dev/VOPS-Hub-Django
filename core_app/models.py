@@ -1,77 +1,44 @@
 # VOPS-Hub/core_app/models.py
 from django.db import models
+from django.utils import timezone
 
 class VesselParticulars(models.Model):
-    """
-    Represents the basic details of a vessel.
-    Reflects the latest 'Vessel Details' sheet columns, with Capacity as Integer.
-    """
-    vessel_name = models.CharField(max_length=255, unique=True, verbose_name="Vessel Name")
-    capacity = models.IntegerField(null=True, blank=True, verbose_name="Capacity") # CHANGED TO INTEGERFIELD
-    number_of_decks = models.IntegerField(null=True, blank=True, verbose_name="Number of Decks")
-    general_notes = models.TextField(null=True, blank=True, verbose_name="General Notes")
-    additional_hazards = models.TextField(null=True, blank=True, verbose_name="Additional Hazards")
-    deck_layout_link = models.URLField(max_length=500, null=True, blank=True, verbose_name="Deck Layout Link")
-    risk_assessment_document_link = models.URLField(max_length=500, null=True, blank=True, verbose_name="Risk Assessment Document Link")
-
-    class Meta:
-        verbose_name = "Vessel Detail"
-        verbose_name_plural = "Vessel Details"
-        ordering = ['vessel_name'] # Default ordering for lists
+    vessel_name = models.CharField(max_length=255, unique=True)
+    capacity = models.FloatField(null=True, blank=True)
+    number_of_decks = models.IntegerField(null=True, blank=True)
+    general_notes = models.TextField(blank=True, null=True)
+    additional_hazards = models.TextField(blank=True, null=True)
+    deck_layout_link = models.URLField(max_length=500, blank=True, null=True)
+    risk_assessment_document_link = models.URLField(max_length=500, blank=True, null=True)
+    vessel_info_link = models.URLField(max_length=500, blank=True, null=True) # NEW FIELD
 
     def __str__(self):
         return self.vessel_name
 
 class VesselDeckHeight(models.Model):
-    """
-    Represents the deck heights for a specific vessel.
-    Reflects the latest 'Deck Heights' sheet columns.
-    """
-    # Foreign Key to VesselParticulars
-    vessel = models.ForeignKey(
-        VesselParticulars,
-        on_delete=models.CASCADE,
-        related_name='deck_heights',
-        verbose_name="Vessel"
-    )
-    deck_number = models.CharField(max_length=50, verbose_name="Deck Number")
-    average_deck_height_m = models.FloatField(null=True, blank=True, verbose_name="Average Deck Height (m)")
-    deck_type = models.CharField(max_length=255, null=True, blank=True, verbose_name="Deck Type")
-    notes = models.TextField(null=True, blank=True)
+    vessel = models.ForeignKey(VesselParticulars, on_delete=models.CASCADE)
+    deck_id = models.IntegerField(null=True, blank=True) # NEW: Integer ID for deck
+    deck_name = models.CharField(max_length=100, blank=True, null=True) # NEW: Alphanumeric name for deck
+    average_deck_height_m = models.FloatField(null=True, blank=True)
+    deck_type = models.CharField(max_length=100, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
 
     class Meta:
-        unique_together = (('vessel', 'deck_number'),)
-        verbose_name = "Vessel Deck Height"
-        verbose_name_plural = "Vessel Deck Heights"
-        ordering = ['vessel', 'deck_number']
+        unique_together = ('vessel', 'deck_id') # Ensure unique deck ID per vessel
+        ordering = ['deck_id'] # Default ordering, can be overridden in views
 
     def __str__(self):
-        return f"{self.vessel.vessel_name} - Deck {self.deck_number} ({self.average_deck_height_m}m)"
+        return f"{self.vessel.vessel_name} - Deck {self.deck_name} (ID: {self.deck_id})"
 
 class VesselComment(models.Model):
-    """
-    Represents comments related to a vessel.
-    Reflects the 'Comments' sheet columns (unchanged).
-    """
-    comment_title = models.CharField(max_length=255, verbose_name="Comment Title")
-    comment_details = models.TextField(verbose_name="Comment Details")
-    date_of_comment = models.DateTimeField(verbose_name="Date of Comment")
-    comment_by = models.CharField(max_length=255, null=True, blank=True, verbose_name="Comment By")
-    related_vessel = models.ForeignKey(
-        VesselParticulars,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='comments',
-        verbose_name="Related Vessel"
-    )
+    comment_title = models.CharField(max_length=255)
+    comment_details = models.TextField()
+    date_of_comment = models.DateTimeField(default=timezone.now)
+    comment_by = models.CharField(max_length=100, blank=True, null=True)
+    related_vessel = models.ForeignKey(VesselParticulars, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
-        verbose_name = "Vessel Comment"
-        verbose_name_plural = "Vessel Comments"
-        ordering = ['-date_of_comment']
+        ordering = ['-date_of_comment'] # Newest comments first
 
     def __str__(self):
-        if self.related_vessel:
-            return f"Comment on {self.related_vessel.vessel_name}: {self.comment_title}"
-        else:
-            return f"General Comment: {self.comment_title}"
+        return f"Comment by {self.comment_by} on {self.related_vessel.vessel_name if self.related_vessel else 'N/A'}"

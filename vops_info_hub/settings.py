@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-ugpl_ot*6vz8%gr*+a_)%m!i!nj)&2nby$!2%79v_#pi(sf6*l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.0.1.2', 'vops.technoshed.co.uk']
 
 
 # Application definition
@@ -77,10 +77,10 @@ WSGI_APPLICATION = 'vops_info_hub.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # This path is relative to the container's WORKDIR (/app)
+        'NAME': BASE_DIR / 'db_data' / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -122,3 +122,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Add this line (or append to it if it exists)
+CSRF_TRUSTED_ORIGINS = ['https://vops.technoshed.co.uk']

@@ -1,26 +1,32 @@
-# Python
+# Byte-code files
 *.pyc
 __pycache__/
-*.egg-info/
-.pytest_cache/
-.venv/
+
+# Django stuff:
+*.log
+*.pot
+*.sql
+*.sqlite3
+.env
+/dev_db_data/ # Your Docker database volume data
+/media/
+/static_root/ # Collected static files
+
+# Dependencies
+.Python
 env/
 venv/
-pip-log.txt
-pip-delete-this-arg.txt
-.python-version
-.env # Keep sensitive environment variables out!
-.vscode/ # VS Code settings can sometimes be project-specific/local
-*.sqlite3 # Your SQLite database file
-media/ # User-uploaded files (if you implement this later)
-static_cdn/ # Collected static files (if you implement this later)
-/htmlcov/
-.coverage
+bin/
+include/
+lib/
+lib64/
 
-# Django specific
-/static/ # The 'static' folder that `collectstatic` generates
-/staticfiles/ # Another common name for collected static files
+# OS files
+.DS_Store
+.envrc
+.idea/
+.vscode/
 
 # Docker
-*.dockerfile
-.dockerignore
+*.env # If you have .env files for Docker variables
+.dockerignore # Often useful, but not usually ignored from source control

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  web:
+    build: . # Build from the Dockerfile in the current directory
+    command: python manage.py runserver 0.0.0.0:8000 # Command to run your Django development server
+    container_name: "VOPS-APP"
+    volumes:
+      - .:/app # Mount your current project directory into /app inside the container
+      - dev_db_data:/app/db_data # Mount a named volume for your SQLite database folder
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    env_file:
+      - .env # If you use a .env file for secrets, add it here (create an empty one if not)
+
+# Define the named volume for persistent database data
+volumes:
+  dev_db_data:
