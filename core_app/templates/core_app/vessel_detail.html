@@ -38,7 +38,11 @@
                 </p>
             </div>
             <div class="card-footer text-muted">
-                <a href="{% url 'core_app:vessel_list' %}" class="btn btn-secondary btn-sm">Back to Vessel List</a> {# UPDATED URL #}
+                <a href="{% url 'core_app:vessel_list' %}" class="btn btn-secondary btn-sm">Back to Vessel List</a>
+                {# Show Add Comment button only if user can add/edit comments #}
+                {% if user_can_add_edit_comments %} {# UPDATED CONDITION #}
+                    <a href="{% url 'core_app:add_comment' vessel.pk %}" class="btn btn-primary btn-sm ms-2">Add Comment</a>
+                {% endif %}
             </div>
         </div>
 
@@ -62,11 +66,17 @@
         {% if comments %}
             <div class="list-group">
                 {% for comment in comments %}
-                    <div class="list-group-item list-group-item-light mb-2">
-                        <h5 class="mb-1">{{ comment.comment_title }}</h5>
-                        <p class="mb-1">{{ comment.comment_details }}</p>
-                        <small class="text-muted">By {{ comment.comment_by|default:"Anonymous" }} on {{ comment.date_of_comment|date:"d M Y H:i" }}</small>
-                    </div>
+                    {# UPDATED: Changed div to a tag and added href #}
+                    <a href="{% url 'core_app:comment_detail' comment.pk %}" class="list-group-item list-group-item-light list-group-item-action flex-column align-items-start mb-2">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ comment.comment_title }}</h5>
+                            <small class="text-muted">{{ comment.date_of_comment|date:"d M Y H:i" }}</small>
+                        </div>
+                        <p class="mb-1">{{ comment.comment_details|truncatechars:150 }}</p> {# Added truncatechars for cleaner list view #}
+                        <small class="text-muted">By: {{ comment.comment_by|default:"Anonymous" }}</small>
+                    </a>
+                {% empty %}
+                    <p>No comments for this vessel.</p>
                 {% endfor %}
             </div>
         {% else %}

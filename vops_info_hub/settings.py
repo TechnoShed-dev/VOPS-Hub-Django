@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from django.urls import reverse_lazy # NEW IMPORT
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -124,3 +125,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Add this line (or append to it if it exists)
 CSRF_TRUSTED_ORIGINS = ['https://vops.technoshed.co.uk']
+
+# Custom Login/Logout URLs
+LOGIN_URL = reverse_lazy('core_app:login') # UPDATED
+LOGIN_REDIRECT_URL = reverse_lazy('core_app:vessel_list') # UPDATED
+LOGOUT_REDIRECT_URL = reverse_lazy('core_app:vessel_list') # UPDATED

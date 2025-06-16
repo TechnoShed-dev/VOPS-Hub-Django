@@ -1,0 +1,35 @@
+{# VOPS-Hub/core_app/templates/core_app/comment_detail.html #}
+{% extends 'core_app/base.html' %}
+
+{% block title %}Comment Details - VOPS-Hub{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">{{ comment.comment_title }}</h2>
+            </div>
+            <div class="card-body">
+                <p class="card-text"><strong>Details:</strong> {{ comment.comment_details|default:"N/A" }}</p>
+                <p class="card-text"><strong>Comment By:</strong> {{ comment.comment_by|default:"Anonymous" }}</p>
+                <p class="card-text"><strong>Date:</strong> {{ comment.date_of_comment|date:"d M Y H:i" }}</p>
+                <p class="card-text"><strong>Related Vessel:</strong>
+                    {% if comment.related_vessel %}
+                        <a href="{% url 'core_app:vessel_detail' comment.related_vessel.pk %}">{{ comment.related_vessel.vessel_name }}</a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-footer text-muted">
+                <a href="{% url 'core_app:comment_list' %}" class="btn btn-secondary btn-sm">Back to Comments List</a>
+                {# Show Edit Comment button only if user can add/edit comments #}
+                {% if user_can_add_edit_comments %} {# UPDATED CONDITION #}
+                    <a href="{% url 'core_app:edit_comment' comment.pk %}" class="btn btn-info btn-sm ms-2">Edit Comment</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,22 @@
+{# VOPS-Hub/core_app/templates/core_app/comment_list.html #}
+{% extends 'core_app/base.html' %}
+
+{% block title %}All Comments - VOPS-Hub{% endblock title %}
+
+{% block content %}
+<h1 class="mb-4">All Comments</h1>
+<div class="list-group">
+    {% for comment in comments %}
+        <a href="{% url 'core_app:comment_detail' comment.pk %}" class="list-group-item list-group-item-action flex-column align-items-start mb-2"> {# Will link to comment_detail (created later) #}
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ comment.comment_title }}</h5>
+                <small class="text-muted">{{ comment.date_of_comment|date:"d M Y H:i" }}</small>
+            </div>
+            <p class="mb-1">{{ comment.comment_details|truncatechars:100 }}</p>
+            <small class="text-muted">On vessel: {{ comment.related_vessel.vessel_name|default:"N/A" }} | By: {{ comment.comment_by|default:"Anonymous" }}</small>
+        </a>
+    {% empty %}
+        <p class="text-center">No comments found.</p>
+    {% endfor %}
+</div>
+{% endblock content %}

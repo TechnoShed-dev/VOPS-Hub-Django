@@ -1,0 +1,24 @@
+{# VOPS-Hub/core_app/templates/core_app/add_comment.html #}
+{% extends 'core_app/base.html' %}
+
+{% block title %}Add Comment - {{ vessel.vessel_name }} - VOPS-Hub{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">Add Comment for {{ vessel.vessel_name }}</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %} {# Django security token #}
+                    {{ form.as_p }} {# Render form fields as paragraphs #}
+                    <button type="submit" class="btn btn-success">Submit Comment</button>
+                    <a href="{% url 'core_app:vessel_detail' vessel.pk %}" class="btn btn-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
