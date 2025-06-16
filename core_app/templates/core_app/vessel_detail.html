@@ -48,16 +48,20 @@
 
         <h3 class="mt-4 mb-3">Deck Heights</h3>
         {% if deck_heights %}
-            <ul class="list-group mb-4">
-                {% for deck in deck_heights %}
-                    <li class="list-group-item">
-                        <strong>Deck Name:</strong> {{ deck.deck_name|default:"N/A" }}<br>
-                        <strong>Average Deck Height:</strong> {{ deck.average_deck_height_m|default:"N/A" }} m
-                        <small class="text-muted d-block">Type: {{ deck.deck_type|default:"N/A" }}</small>
-                        <small class="text-muted d-block">Notes: {{ deck.notes|default:"None" }}</small>
-                    </li>
-                {% endfor %}
-            </ul>
+            {# NEW: Scrollable container for Deck Heights #}
+            <div style="max-height: 450px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 5px; background-color: #f8f9fa;">
+                <ul class="list-group mb-0"> {# Changed mb-4 to mb-0 to contain UL within scroll div #}
+                    {% for deck in deck_heights %}
+                        <li class="list-group-item">
+                            <strong>Deck Name:</strong> {{ deck.deck_name|default:"N/A" }}<br>
+                            <strong>Average Deck Height:</strong> {{ deck.average_deck_height_m|default:"N/A" }} m
+                            <small class="text-muted d-block">Type: {{ deck.deck_type|default:"N/A" }}</small>
+                            <small class="text-muted d-block">Notes: {{ deck.notes|default:"None" }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {# End of scrollable container #}
         {% else %}
             <p>No deck heights recorded for this vessel.</p>
         {% endif %}
