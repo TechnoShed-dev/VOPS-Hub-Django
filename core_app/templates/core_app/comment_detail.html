@@ -12,7 +12,14 @@
             </div>
             <div class="card-body">
                 <p class="card-text"><strong>Details:</strong> {{ comment.comment_details|default:"N/A" }}</p>
-                <p class="card-text"><strong>Comment By:</strong> {{ comment.comment_by|default:"Anonymous" }}</p>
+                <p class="card-text"><strong>Comment By:</strong>
+                    {% if comment.comment_by %}
+                        {# Use get_full_name for robustness, falls back to username if names are blank #}
+                        {{ comment.comment_by.get_full_name|default:comment.comment_by.username }}
+                    {% else %}
+                        Anonymous {# If comment_by is null (e.g., user deleted or old comment) #}
+                    {% endif %}
+                </p>
                 <p class="card-text"><strong>Date:</strong> {{ comment.date_of_comment|date:"d M Y H:i" }}</p>
                 <p class="card-text"><strong>Related Vessel:</strong>
                     {% if comment.related_vessel %}
