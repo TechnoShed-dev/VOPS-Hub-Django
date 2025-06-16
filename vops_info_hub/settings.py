@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # My apps
-    'core_app', # Add your app here!
+    'crispy_forms',
+    'crispy_bootstrap5',
+    'core_app', # Add your app here! 
 ]
 
 MIDDLEWARE = [
@@ -133,3 +135,5 @@ CSRF_TRUSTED_ORIGINS = ['https://vops.technoshed.co.uk']
 LOGIN_URL = reverse_lazy('core_app:login') # UPDATED
 LOGIN_REDIRECT_URL = reverse_lazy('core_app:vessel_list') # UPDATED
 LOGOUT_REDIRECT_URL = reverse_lazy('core_app:vessel_list') # UPDATED
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

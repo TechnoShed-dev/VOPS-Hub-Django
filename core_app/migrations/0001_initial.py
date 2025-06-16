@@ -3,7 +3,7 @@
 import django.db.models.deletion
 import django.utils.timezone
 from django.db import migrations, models
-
+from django.conf import settings
 
 class Migration(migrations.Migration):
 
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('comment_title', models.CharField(max_length=255)),
                 ('comment_details', models.TextField()),
                 ('date_of_comment', models.DateTimeField(default=django.utils.timezone.now)),
-                ('comment_by', models.CharField(blank=True, max_length=100, null=True)),
+                ('comment_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='vessel_comments', to=settings.AUTH_USER_MODEL)),
                 ('related_vessel', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='core_app.vesselparticulars')),
             ],
             options={

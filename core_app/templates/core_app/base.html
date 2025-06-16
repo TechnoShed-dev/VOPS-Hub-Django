@@ -37,6 +37,10 @@
                                 Hello, {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                {# NEW: Add Vessel option, only for Office group members #}
+                                {% if user_in_office_group %}
+                                <li><a class="dropdown-item" href="{% url 'core_app:add_vessel_with_decks' %}">Add New Vessel</a></li>
+                                {% endif %}
                                 <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin Panel</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'core_app:logout' %}">Logout</a></li>

@@ -13,6 +13,8 @@ urlpatterns = [
     path('vessels/<int:pk>/add_comment/', views.add_comment, name='add_comment'),
     path('comments/', views.comment_list, name='comment_list'),
     # NEW: Path for listing all comments (if you implement a view for this)
+    # NEW URL PATTERN FOR ADDING VESSEL WITH DECKS
+    path('add_vessel/', views.add_vessel_with_decks, name='add_vessel_with_decks'),
     # NEW: Path for showing a single comment's details
     path('comments/<int:pk>/', views.comment_detail, name='comment_detail'),
     # NEW: Path for editing a specific comment

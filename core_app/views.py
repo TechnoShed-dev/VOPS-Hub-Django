@@ -1,19 +1,33 @@
 # VOPS-Hub/core_app/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required # NEW IMPORT
+
 from django.contrib.auth.models import Group # NEW IMPORT - for checking group membership
 from django.http import HttpResponseForbidden # NEW IMPORT - for access denied
 from django.contrib.auth.forms import AuthenticationForm # NEW IMPORT
 from django.contrib.auth import login, logout # NEW IMPORTS
 from django.urls import reverse # NEW IMPORT, useful for redirects
 from django.conf import settings # NEW IMPORT, to access LOGIN_REDIRECT_URL
-from .models import VesselParticulars, VesselDeckHeight, VesselComment
-from .forms import VesselCommentForm
+from django.db import transaction # For atomic saving of vessel and decks
+from django.urls import reverse_lazy # For redirecting after successful save
+from .decorators import group_required # Our custom decorator
+
+# Import your new forms
+from .forms import VesselParticularsForm, VesselDeckHeightFormSet,VesselCommentForm
+# Import your models
+from .models import VesselParticulars, VesselComment, VesselDeckHeight
 
 def vessel_list(request):
     vessels = VesselParticulars.objects.all().order_by('vessel_name')
+    # NEW: Determine if the user is in the 'Office' group or is a superuser
+    user_in_office_group = False
+    if request.user.is_authenticated:
+        if request.user.is_superuser or request.user.groups.filter(name='Office').exists():
+            user_in_office_group = True
+
     context = {
-        'vessels': vessels
+        'vessels': vessels,
+        'user_in_office_group': user_in_office_group, # ADD THIS TO CONTEXT
     }
     return render(request, 'core_app/vessel_list.html', context)
 
@@ -49,7 +63,7 @@ def add_comment(request, pk):
         if form.is_valid():
             comment = form.save(commit=False) # Create comment object but don't save yet
             comment.related_vessel = vessel
-            comment.comment_by = request.user.username # NEW: Set comment_by automatically
+            comment.comment_by = request.user # NEW: Set comment_by automatically
             comment.save() # Now save the comment
             return redirect('core_app:vessel_detail', pk=vessel.pk)
     else:
@@ -135,6 +149,45 @@ def custom_logout(request):
     logout(request) # Logs the user out
     return redirect(settings.LOGOUT_REDIRECT_URL) # Redirect to specified URL
 
+# NEW VIEW: Add Vessel with Decks
+@group_required('Office', redirect_url='core_app:vessel_list') # Only 'Office' group can access
+@login_required # Ensure user is logged in
+def add_vessel_with_decks(request):
+    if request.method == 'POST':
+        vessel_form = VesselParticularsForm(request.POST)
+        # Pass the request.POST and request.FILES to the formset
+        # instance=None because we are creating a new vessel
+        deck_formset = VesselDeckHeightFormSet(request.POST, request.FILES, instance=None)
 
+        if vessel_form.is_valid() and deck_formset.is_valid():
+            with transaction.atomic(): # Ensures all saves succeed or none are saved
+                vessel = vessel_form.save() # Save the vessel first
+
+                # Associate each valid deck form with the new vessel
+                for form in deck_formset:
+                    if form.cleaned_data: # Only save forms with data
+                        # Check if the form is marked for deletion (if editing existing)
+                        # For adding new, this mainly checks if it's not an empty form
+                        if form.cleaned_data.get('DELETE'):
+                            continue # Skip deleted forms
+
+                        deck_height = form.save(commit=False)
+                        deck_height.vessel = vessel # Link to the newly created vessel
+                        deck_height.save()
+
+            return redirect(reverse_lazy('core_app:vessel_list')) # Redirect to vessel list after success
+        else:
+            # If forms are not valid, they will be rendered again with errors
+            pass
+    else: # GET request
+        vessel_form = VesselParticularsForm()
+        deck_formset = VesselDeckHeightFormSet(instance=None) # Start with empty formset
+
+    context = {
+        'vessel_form': vessel_form,
+        'deck_formset': deck_formset,
+        'title': 'Add New Vessel and Decks' # Title for the template
+    }
+    return render(request, 'core_app/add_vessel_with_decks.html', context)
 
 

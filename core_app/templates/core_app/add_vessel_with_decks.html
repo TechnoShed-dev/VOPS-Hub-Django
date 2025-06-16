@@ -1,0 +1,108 @@
+{# VOPS-Hub/core_app/templates/core_app/add_vessel_with_decks.html #}
+{% extends 'core_app/base.html' %}
+{% load crispy_forms_tags %} {# Assuming you have crispy_forms installed and configured #}
+
+{% block title %}{{ title }} - VOPS-Hub{% endblock title %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg mt-5">
+            <div class="card-header bg-primary text-white text-center">
+                <h2 class="mb-0">{{ title }}</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" id="vessel-form">
+                    {% csrf_token %}
+
+                    {# Vessel Particulars Form #}
+                    <fieldset class="form-group border p-3 mb-4">
+                        <legend class="w-auto px-2">Vessel Details</legend>
+                        {{ vessel_form|crispy }}
+                    </fieldset>
+
+                    {# Deck Heights Formset #}
+                    <fieldset class="form-group border p-3 mb-4">
+                        <legend class="w-auto px-2">Deck Heights</legend>
+                        {{ deck_formset.management_form }} {# IMPORTANT: Renders hidden fields for formset management #}
+
+                        <div id="formset-container">
+                            {% for form in deck_formset %}
+                                <div class="deck-formset-row border border-info rounded p-3 mb-3">
+                                    <h6 class="border-bottom pb-2">Deck #<span class="deck-number">{{ forloop.counter }}</span></h6>
+                                    {% if form.instance.pk %}{{ form.DELETE }}{% endif %} {# Only show delete for existing forms #}
+                                    {{ form|crispy }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <button type="button" id="add-more-decks" class="btn btn-info btn-sm mt-3">Add Another Deck</button>
+                    </fieldset>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">Save Vessel & Decks</button>
+                        <a href="{% url 'core_app:vessel_list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} JavaScript for dynamically adding formset forms {% endcomment %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addMoreBtn = document.getElementById('add-more-decks');
+        const formsetContainer = document.getElementById('formset-container');
+        const totalForms = document.getElementById('id_vesseldeckheight_set-TOTAL_FORMS');
+        const formPrototype = formsetContainer.children[0] ? formsetContainer.children[0].cloneNode(true) : null;
+
+        // Update deck numbers
+        function updateDeckNumbers() {
+            document.querySelectorAll('.deck-formset-row').forEach((row, index) => {
+                const deckNumberSpan = row.querySelector('.deck-number');
+                if (deckNumberSpan) {
+                    deckNumberSpan.textContent = index + 1;
+                }
+            });
+        }
+
+        if (!formPrototype) {
+            console.warn("No initial form in formset, dynamic add might not work as expected.");
+            // Create a basic structure if no initial forms were rendered (e.g., if extra=0)
+            // This scenario is less likely with extra=1
+        }
+
+        addMoreBtn.addEventListener('click', function() {
+            const currentForms = parseInt(totalForms.value);
+            const newForm = formPrototype.cloneNode(true);
+
+            // Update input IDs and names for the new form
+            const regex = new RegExp(`-__prefix__-`, 'g');
+            newForm.innerHTML = newForm.innerHTML.replace(regex, `-${currentForms}-`);
+
+            // Clear input values in the new form
+            newForm.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.type !== 'hidden') {
+                    input.value = '';
+                    input.checked = false;
+                }
+                // Reset validity state
+                input.classList.remove('is-valid', 'is-invalid');
+            });
+
+            // Clear any error messages from the cloned form
+            newForm.querySelectorAll('.invalid-feedback, .errorlist').forEach(errorElement => {
+                errorElement.remove();
+            });
+
+            formsetContainer.appendChild(newForm);
+            totalForms.value = currentForms + 1;
+            updateDeckNumbers();
+        });
+
+        // Initial update of deck numbers
+        updateDeckNumbers();
+    });
+</script>
+{% endblock content %}

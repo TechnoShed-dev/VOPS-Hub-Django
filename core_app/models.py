@@ -1,6 +1,7 @@
 # VOPS-Hub/core_app/models.py
 from django.db import models
 from django.utils import timezone
+from django.conf import settings # NEW IMPORT: To reference AUTH_USER_MODEL
 
 class VesselParticulars(models.Model):
     vessel_name = models.CharField(max_length=255, unique=True)
@@ -34,11 +35,12 @@ class VesselComment(models.Model):
     comment_title = models.CharField(max_length=255)
     comment_details = models.TextField()
     date_of_comment = models.DateTimeField(default=timezone.now)
-    comment_by = models.CharField(max_length=100, blank=True, null=True)
+    # Ensure this line is correct:
+    comment_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='vessel_comments')
     related_vessel = models.ForeignKey(VesselParticulars, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         ordering = ['-date_of_comment'] # Newest comments first
 
     def __str__(self):
-        return f"Comment by {self.comment_by} on {self.related_vessel.vessel_name if self.related_vessel else 'N/A'}"
+        return f"Comment by {self.comment_by.username if self.comment_by else 'Anonymous'} on {self.related_vessel.vessel_name if self.related_vessel else 'N/A'}"

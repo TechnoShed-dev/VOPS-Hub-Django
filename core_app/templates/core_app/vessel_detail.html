@@ -76,7 +76,15 @@
                             <small class="text-muted">{{ comment.date_of_comment|date:"d M Y H:i" }}</small>
                         </div>
                         <p class="mb-1">{{ comment.comment_details|truncatechars:150 }}</p>
-                        <small class="text-muted">By: {{ comment.comment_by|default:"Anonymous" }}</small>
+                        {# UPDATED: Display First Name and Last Name from User Object #}
+                        <small class="text-muted">By:
+                            {% if comment.comment_by %}
+                                {# Use get_full_name for robustness, falls back to username if names are blank #}
+                                {{ comment.comment_by.get_full_name|default:comment.comment_by.username }}
+                            {% else %}
+                                Anonymous {# If comment_by is null (e.g., user deleted or old comment) #}
+                            {% endif %}
+                        </small>
                     </a>
                 {% empty %}
                     <p>No comments for this vessel.</p>
