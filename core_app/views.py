@@ -74,15 +74,19 @@ def comment_list(request):
 def comment_detail(request, pk):
     comment = get_object_or_404(VesselComment, pk=pk)
 
-    # NEW: Determine if the user can add/edit comments
     user_can_add_edit_comments = False
     if request.user.is_authenticated:
         if request.user.groups.filter(name='RedVests').exists():
             user_can_add_edit_comments = True
 
+    # NEW: Get 'next' URL parameter from the request
+    # Default to the comment list if 'next' is not provided
+    next_url = request.GET.get('next', reverse('core_app:comment_list'))
+
     context = {
         'comment': comment,
-        'user_can_add_edit_comments': user_can_add_edit_comments, # NEW CONTEXT VARIABLE
+        'user_can_add_edit_comments': user_can_add_edit_comments,
+        'next_url': next_url, # NEW CONTEXT VARIABLE
     }
     return render(request, 'core_app/comment_detail.html', context)
 

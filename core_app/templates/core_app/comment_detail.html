@@ -23,9 +23,9 @@
                 </p>
             </div>
             <div class="card-footer text-muted">
-                <a href="{% url 'core_app:comment_list' %}" class="btn btn-secondary btn-sm">Back to Comments List</a>
-                {# Show Edit Comment button only if user can add/edit comments #}
-                {% if user_can_add_edit_comments %} {# UPDATED CONDITION #}
+                {# UPDATED: Back button uses next_url #}
+                <a href="{{ next_url }}" class="btn btn-secondary btn-sm">Back</a>
+                {% if user_can_add_edit_comments %}
                     <a href="{% url 'core_app:edit_comment' comment.pk %}" class="btn btn-info btn-sm ms-2">Edit Comment</a>
                 {% endif %}
             </div>

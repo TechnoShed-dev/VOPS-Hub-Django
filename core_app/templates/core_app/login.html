@@ -1,13 +1,15 @@
 {# VOPS-Hub/core_app/templates/core_app/login.html #}
 {% extends 'core_app/base.html' %}
-
+{% load static %} {# NEW: This line must be at the very top #}
 {% block title %}Login - VOPS-Hub{% endblock title %}
 
 {% block content %}
 <div class="row justify-content-center mt-5">
     <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white text-center">
+            <div class="card-header bg-primary text-white text-center d-flex align-items-center justify-content-center"> {# UPDATED CLASSES #}
+                {# NEW: Logo on Login Screen #}
+                <img src="{% static 'newLogo.jpg' %}" alt="VOPS-Hub Logo" style="height: 25px; margin-right: 10px; border-radius: 3px;">
                 <h2 class="card-title mb-0">VOPS-Hub Login</h2>
             </div>
             <div class="card-body">
@@ -19,7 +21,7 @@
                 <form method="post">
                     {% csrf_token %}
                     {# Render the form fields #}
-                    {{ form.as_p }} {# This will render username and password fields wrapped in <p> tags #}
+                    {{ form.as_p }}
                     <button type="submit" class="btn btn-success w-100">Login</button>
                 </form>
             </div>

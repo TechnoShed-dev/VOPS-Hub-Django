@@ -51,7 +51,7 @@
             <ul class="list-group mb-4">
                 {% for deck in deck_heights %}
                     <li class="list-group-item">
-                        <strong>Deck Name:</strong> {{ deck.deck_name|default:"N/A" }} (ID: {{ deck.deck_id|default:"N/A" }})<br>
+                        <strong>Deck Name:</strong> {{ deck.deck_name|default:"N/A" }}<br>
                         <strong>Average Deck Height:</strong> {{ deck.average_deck_height_m|default:"N/A" }} m
                         <small class="text-muted d-block">Type: {{ deck.deck_type|default:"N/A" }}</small>
                         <small class="text-muted d-block">Notes: {{ deck.notes|default:"None" }}</small>
@@ -66,13 +66,12 @@
         {% if comments %}
             <div class="list-group">
                 {% for comment in comments %}
-                    {# UPDATED: Changed div to a tag and added href #}
-                    <a href="{% url 'core_app:comment_detail' comment.pk %}" class="list-group-item list-group-item-light list-group-item-action flex-column align-items-start mb-2">
+                    <a href="{% url 'core_app:comment_detail' comment.pk %}?next={% url 'core_app:vessel_detail' vessel.pk %}" class="list-group-item list-group-item-light list-group-item-action flex-column align-items-start mb-2">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">{{ comment.comment_title }}</h5>
                             <small class="text-muted">{{ comment.date_of_comment|date:"d M Y H:i" }}</small>
                         </div>
-                        <p class="mb-1">{{ comment.comment_details|truncatechars:150 }}</p> {# Added truncatechars for cleaner list view #}
+                        <p class="mb-1">{{ comment.comment_details|truncatechars:150 }}</p>
                         <small class="text-muted">By: {{ comment.comment_by|default:"Anonymous" }}</small>
                     </a>
                 {% empty %}
