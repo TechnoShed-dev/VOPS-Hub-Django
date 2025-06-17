@@ -1,7 +1,7 @@
 # VOPS-Hub/core_app/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required # NEW IMPORT
-
+from django.contrib import messages
 from django.contrib.auth.models import Group # NEW IMPORT - for checking group membership
 from django.http import HttpResponseForbidden # NEW IMPORT - for access denied
 from django.contrib.auth.forms import AuthenticationForm # NEW IMPORT
@@ -154,39 +154,40 @@ def custom_logout(request):
 @login_required # Ensure user is logged in
 def add_vessel_with_decks(request):
     if request.method == 'POST':
-        vessel_form = VesselParticularsForm(request.POST)
-        # Pass the request.POST and request.FILES to the formset
-        # instance=None because we are creating a new vessel
-        deck_formset = VesselDeckHeightFormSet(request.POST, request.FILES, instance=None)
+        vessel_form = VesselParticularsForm(request.POST, prefix='vessel')
+        deck_formset = VesselDeckHeightFormSet(request.POST, prefix='decks')
 
         if vessel_form.is_valid() and deck_formset.is_valid():
-            with transaction.atomic(): # Ensures all saves succeed or none are saved
-                vessel = vessel_form.save() # Save the vessel first
+            # Save the vessel first
+            vessel = vessel_form.save()
 
-                # Associate each valid deck form with the new vessel
-                for form in deck_formset:
-                    if form.cleaned_data: # Only save forms with data
-                        # Check if the form is marked for deletion (if editing existing)
-                        # For adding new, this mainly checks if it's not an empty form
-                        if form.cleaned_data.get('DELETE'):
-                            continue # Skip deleted forms
+            # Save the deck heights linked to the newly created vessel
+            # Using formset.save(commit=False) to link to the vessel manually
+            instances = deck_formset.save(commit=False)
+            for instance in instances:
+                instance.vessel = vessel # Link each deck instance to the vessel
+                instance.save() # Save the individual deck instance
 
-                        deck_height = form.save(commit=False)
-                        deck_height.vessel = vessel # Link to the newly created vessel
-                        deck_height.save()
+            # Handle deleted forms (if any)
+            # deck_formset.deleted_forms contains forms marked for deletion,
+            # though usually relevant when editing, not just adding.
+            # If you implement editing, you'd add:
+            # for form in deck_formset.deleted_forms:
+            #     form.instance.delete()
 
-            return redirect(reverse_lazy('core_app:vessel_list')) # Redirect to vessel list after success
+
+            messages.success(request, 'Vessel and deck heights added successfully!')
+            return redirect('core_app:vessel_list') # Redirect to vessel list after successful save
         else:
-            # If forms are not valid, they will be rendered again with errors
-            pass
-    else: # GET request
-        vessel_form = VesselParticularsForm()
-        deck_formset = VesselDeckHeightFormSet(instance=None) # Start with empty formset
+            # If forms are not valid, display errors
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        vessel_form = VesselParticularsForm(prefix='vessel')
+        deck_formset = VesselDeckHeightFormSet(prefix='decks')
 
     context = {
         'vessel_form': vessel_form,
         'deck_formset': deck_formset,
-        'title': 'Add New Vessel and Decks' # Title for the template
     }
     return render(request, 'core_app/add_vessel_with_decks.html', context)
 

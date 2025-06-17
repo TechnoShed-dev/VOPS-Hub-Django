@@ -24,7 +24,8 @@
                     {# Deck Heights Formset #}
                     <fieldset class="form-group border p-3 mb-4">
                         <legend class="w-auto px-2">Deck Heights</legend>
-                        {{ deck_formset.management_form }} {# IMPORTANT: Renders hidden fields for formset management #}
+                        {# IMPORTANT: Renders hidden fields for formset management #}
+                        {{ deck_formset.management_form }}
 
                         <div id="formset-container">
                             {% for form in deck_formset %}
@@ -34,6 +35,14 @@
                                     {{ form|crispy }}
                                 </div>
                             {% endfor %}
+                        </div>
+
+                        {# NEW: Hidden template for cloning empty forms #}
+                        <div id="empty-form-template" style="display: none;">
+                            <div class="deck-formset-row border border-info rounded p-3 mb-3">
+                                <h6 class="border-bottom pb-2">Deck #<span class="deck-number"></span></h6>{# Deck number will be updated by JS #}
+                                {{ deck_formset.empty_form|crispy }} {# Render the empty form here #}
+                            </div>
                         </div>
 
                         <button type="button" id="add-more-decks" class="btn btn-info btn-sm mt-3">Add Another Deck</button>
@@ -54,10 +63,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         const addMoreBtn = document.getElementById('add-more-decks');
         const formsetContainer = document.getElementById('formset-container');
-        const totalForms = document.getElementById('id_vesseldeckheight_set-TOTAL_FORMS');
-        const formPrototype = formsetContainer.children[0] ? formsetContainer.children[0].cloneNode(true) : null;
+        // CORRECTED LINE: Using the exact ID 'id_decks-TOTAL_FORMS'
+        const totalForms = document.getElementById('id_decks-TOTAL_FORMS');
+        const formPrototypeWrapper = document.getElementById('empty-form-template');
 
-        // Update deck numbers
+        const formPrototypeHtml = formPrototypeWrapper.innerHTML;
+
         function updateDeckNumbers() {
             document.querySelectorAll('.deck-formset-row').forEach((row, index) => {
                 const deckNumberSpan = row.querySelector('.deck-number');
@@ -67,41 +78,31 @@
             });
         }
 
-        if (!formPrototype) {
-            console.warn("No initial form in formset, dynamic add might not work as expected.");
-            // Create a basic structure if no initial forms were rendered (e.g., if extra=0)
-            // This scenario is less likely with extra=1
-        }
-
         addMoreBtn.addEventListener('click', function() {
             const currentForms = parseInt(totalForms.value);
-            const newForm = formPrototype.cloneNode(true);
+            const newFormHtml = formPrototypeHtml.replace(/__prefix__/g, currentForms);
 
-            // Update input IDs and names for the new form
-            const regex = new RegExp(`-__prefix__-`, 'g');
-            newForm.innerHTML = newForm.innerHTML.replace(regex, `-${currentForms}-`);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newFormHtml.trim();
+            const newFormElement = tempDiv.firstChild;
 
-            // Clear input values in the new form
-            newForm.querySelectorAll('input, select, textarea').forEach(input => {
+            newFormElement.querySelectorAll('input, select, textarea').forEach(input => {
                 if (input.type !== 'hidden') {
                     input.value = '';
                     input.checked = false;
                 }
-                // Reset validity state
                 input.classList.remove('is-valid', 'is-invalid');
             });
 
-            // Clear any error messages from the cloned form
-            newForm.querySelectorAll('.invalid-feedback, .errorlist').forEach(errorElement => {
+            newFormElement.querySelectorAll('.invalid-feedback, .errorlist').forEach(errorElement => {
                 errorElement.remove();
             });
 
-            formsetContainer.appendChild(newForm);
+            formsetContainer.appendChild(newFormElement);
             totalForms.value = currentForms + 1;
             updateDeckNumbers();
         });
 
-        // Initial update of deck numbers
         updateDeckNumbers();
     });
 </script>
